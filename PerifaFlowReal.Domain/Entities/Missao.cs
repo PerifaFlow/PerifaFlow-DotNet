@@ -24,4 +24,12 @@ public class Missao : Audit
         
         SetCreated(CreatedBy);
     }
+
+    public void Uodate(string titulo, string descricao)
+    {
+        Titulo = titulo;
+        Descricao = descricao;
+        
+        SetUpdated(UpdatedBy);
+    }
 }

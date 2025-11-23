@@ -16,6 +16,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ICreateUserUseCase, CreateUserUseCase>();
         services.AddScoped<ICreateMissaoUseCase, CreateMissaoUseCase>();
+        services.AddScoped<IUpdateMissaoUseCase, UpdateMissaoUseCase>();
         services.AddScoped<IRealizarEntregaUseCase, RealizarEntregaUseCase>();
         services.AddScoped<ObterInsightUseCase>();
         services.AddScoped<RegistrarRitimoUseCase>();

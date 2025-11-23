@@ -1,4 +1,6 @@
-﻿namespace PerifaFlow.Domain.Entities;
+﻿using System.Data;
+
+namespace PerifaFlow.Domain.Entities;
 
 public class Trilha : Audit
 {
@@ -15,5 +17,13 @@ public class Trilha : Audit
         Missao = new List<Missao>();
         
         SetCreated(CreatedBy);
+    }
+
+    public void Update(string titulo, string descricao)
+    {
+        Titulo = titulo;
+        Descricao = descricao;
+        
+        SetUpdated(UpdatedBy);
     }
 }

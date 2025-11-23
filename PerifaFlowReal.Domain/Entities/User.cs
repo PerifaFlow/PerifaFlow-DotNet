@@ -31,7 +31,6 @@ public class User : Audit
     public void Update(string username, string email, string password, string updatedBy)
     {
         Username = username;
-        Username = username;
         Email = email;
         Password = password;
         
