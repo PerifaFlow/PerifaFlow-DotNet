@@ -1,0 +1,55 @@
+﻿using Microsoft.OpenApi.Models;
+using PerifaFlowReal.Application.Configs;
+
+namespace PerifaFlowReal.api.extensions;
+
+public static class SwaggerExtensions
+{
+    public static IServiceCollection AddSwagger(this IServiceCollection services, Settings settings)
+    {
+        services.AddSwaggerGen(swagger =>
+        {
+            swagger.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = settings.Swagger.Title,
+                Version = settings.Swagger.Version,
+                Description = settings.Swagger.Description,
+                Contact = settings.Swagger.Contact
+            });
+           
+           
+            swagger.SwaggerDoc("v2", new OpenApiInfo
+            {
+                Title = settings.SwaggerV2.Title,
+                Version = settings.SwaggerV2.Version,
+                Description = settings.SwaggerV2.Description,
+                Contact =  settings.SwaggerV2.Contact
+            });
+            swagger.EnableAnnotations();
+            swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "Please insert JWT with Bearer into field",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+            });
+                
+            swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    []
+                }
+            });
+        });
+        return services;
+    }    
+}
