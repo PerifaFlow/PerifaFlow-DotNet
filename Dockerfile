@@ -11,15 +11,15 @@ WORKDIR /src
  
 # Copiar arquivos de projeto primeiro (otimiza cache)
 
-COPY PerifaFlow.api/PerifaFlow.api.csproj ./PerifaFlow.API/
+COPY PerifaFlowReal.api/PerifaFlowReal.api.csproj ./PerifaFlowReal.api/
 
-COPY PerifaFlow.Domain/PerifaFlow.Domain.csproj ./PerifaFlow.Domain/
+COPY PerifaFlowReal.Domain/PerifaFlowReal.Domain.csproj ./PerifaFlowReal.Domain/
 
-COPY PerifaFlow.Infrastructure/PerifaFlow.Infrastructure.csproj ./PerifaFlow.Infrastructure/
+COPY PerifaFlowReal.Infastructure/PerifaFlowReal.Infastructure.csproj ./PerifaFlowReal.Infastructure/
  
 # Restaurar dependências
 
-RUN dotnet restore PerifaFlow.api/PerifaFlow.api.csproj
+RUN dotnet restore PerifaFlowReal.api/PerifaFlowReal.api.csproj
  
 # Copiar todo o código
 
@@ -27,7 +27,7 @@ COPY . .
  
 # Build e publish
 
-WORKDIR /src/Perifaflow.api
+WORKDIR /src/PerifaFlowReal.api
 
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
  
@@ -58,5 +58,5 @@ EXPOSE 8080
  
 # Comando de execução
 
-ENTRYPOINT ["dotnet", "PerifaFlow.api.dll"]
+ENTRYPOINT ["dotnet", "PerifaFlowReal.api.dll"]
  
