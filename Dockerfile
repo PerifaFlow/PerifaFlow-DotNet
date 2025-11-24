@@ -1,62 +1,33 @@
+# Acesse https://aka.ms/customizecontainer para saber como personalizar seu contêiner de depuração e como o Visual Studio usa este Dockerfile para criar suas imagens para uma depuração mais rápida.
 
-# ===============================
-
-# Stage 1: Build da aplicação
-
-# ===============================
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-
-WORKDIR /src
- 
-# Copiar arquivos de projeto primeiro (otimiza cache)
-
-COPY PerifaFlowReal.api/PerifaFlowReal.api.csproj ./PerifaFlowReal.api/
-
-COPY PerifaFlowReal.Domain/PerifaFlowReal.Domain.csproj ./PerifaFlowReal.Domain/
-
-COPY PerifaFlowReal.Infastructure/PerifaFlowReal.Infastructure.csproj ./PerifaFlowReal.Infastructure/
- 
-# Restaurar dependências
-
-RUN dotnet restore PerifaFlowReal.api/PerifaFlowReal.api.csproj
- 
-# Copiar todo o código
-
-COPY . .
- 
-# Build e publish
-
-WORKDIR /src/PerifaFlowReal.api
-
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
- 
-# ===============================
-
-# Stage 2: Runtime
-
-# ===============================
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-
+# Esta fase é usada durante a execução no VS no modo rápido (Padrão para a configuração de Depuração)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
- 
- 
-# Criar usuário não-root
-
-RUN groupadd appgroup && useradd -M -s /bin/sh -g appgroup appuser
-
-USER appuser
- 
-# Copiar arquivos publicados do stage build
-
-COPY --from=build /app/publish .
- 
-# Expor porta da aplicação
-
 EXPOSE 8080
- 
-# Comando de execução
+EXPOSE 8081
 
+
+# Esta fase é usada para compilar o projeto de serviço
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["PerifaFlowReal.api/PerifaFlowReal.api.csproj", "PerifaFlowReal.api/"]
+COPY ["PerifaFlowReal.Application/PerifaFlowReal.Application.csproj", "PerifaFlowReal.Application/"]
+COPY ["PerifaFlowReal.Domain/PerifaFlowReal.Domain.csproj", "PerifaFlowReal.Domain/"]
+COPY ["PerifaFlowReal.Infastructure/PerifaFlowReal.Infastructure.csproj", "PerifaFlowReal.Infastructure/"]
+RUN dotnet restore "./PerifaFlowReal.api/PerifaFlowReal.api.csproj"
+COPY . .
+WORKDIR "/src/PerifaFlowReal.api"
+RUN dotnet build "./PerifaFlowReal.api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./PerifaFlowReal.api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PerifaFlowReal.api.dll"]
- 
